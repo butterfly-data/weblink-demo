@@ -2,54 +2,38 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Upload to butterfly data</title>
+  <title>Upload to Butterfly Data</title>
 </head>
 <body>
   <h2>Upload Files to butterfly data</h2>
-
-  <form id="uploadForm" enctype="multipart/form-data">
-    <label for="clientId">Client ID:</label>
-    <input type="text" id="clientId" name="clientId" value="client_123" required />
+  <form id="upload-form">
+    <label>Client ID:
+      <input type="text" name="clientId" value="client_123" />
+    </label>
     <br><br>
-
-    <label for="files">Select files:</label>
-    <input type="file" id="files" name="file" multiple required />
+    <label>Select files:
+      <input type="file" name="file" />
+    </label>
     <br><br>
-
     <button type="submit">Upload</button>
   </form>
 
-  <pre id="responseBox"></pre>
+  <pre id="output"></pre>
 
   <script>
-    const form = document.getElementById('uploadForm');
-    const responseBox = document.getElementById('responseBox');
-
-    form.addEventListener('submit', async (e) => {
+    document.getElementById('upload-form').addEventListener('submit', async (e) => {
       e.preventDefault();
 
-      const clientId = document.getElementById('clientId').value;
-      const fileInput = document.getElementById('files');
-      const files = fileInput.files;
+      const form = e.target;
+      const formData = new FormData(form);
 
-      const formData = new FormData();
-      formData.append("clientId", clientId);
+      const response = await fetch('https://aavqxnyuhnwsdckmtimp.supabase.co/functions/v1/get-upload-link', {
+        method: 'POST',
+        body: formData,
+      });
 
-      for (let i = 0; i < files.length; i++) {
-        formData.append("file", files[i]);
-      }
-
-      try {
-        const res = await fetch("https://aavqxnyuhnwsdckmtimp.supabase.co/functions/v1/get-upload-link", {
-          method: "POST",
-          body: formData
-        });
-
-        const result = await res.json();
-        responseBox.textContent = JSON.stringify(result, null, 2);
-      } catch (err) {
-        responseBox.textContent = "Upload failed:\n" + err;
-      }
+      const result = await response.json();
+      document.getElementById('output').textContent = JSON.stringify(result, null, 2);
     });
   </script>
 </body>
