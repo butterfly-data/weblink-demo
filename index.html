@@ -2,50 +2,57 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Butterfly Data Upload</title>
+  <title>Upload to Supabase</title>
 </head>
 <body>
-  <h2>Upload Files to Butterfly Data Consulting</h2>
+  <h2>Upload Files to Supabase</h2>
 
-  <form
-    id="upload-form"
-    method="POST"
-    enctype="multipart/form-data"
-    action="https://aavqxnyuhnwsdckmtimp.supabase.co/functions/v1/get-upload-link"
-  >
+  <form id="uploadForm" enctype="multipart/form-data">
     <label for="clientId">Client ID:</label>
-    <input
-      type="text"
-      id="clientId"
-      name="clientId"
-      value="client_123"
-      required
-    />
-    <br /><br />
+    <input type="text" id="clientId" name="clientId" value="client_123" required />
+    <br><br>
 
-    <label for="file">Choose Files:</label>
-    <input
-      type="file"
-      id="file"
-      name="file"
-      multiple
-      required
-    />
-    <br /><br />
+    <label for="files">Select files:</label>
+    <input type="file" id="files" name="file" multiple required />
+    <br><br>
 
     <button type="submit">Upload</button>
   </form>
 
-  <div id="status" style="margin-top: 20px;"></div>
+  <pre id="responseBox"></pre>
 
   <script>
-    // Optional: update status after submission
-    const form = document.getElementById("upload-form");
-    const statusDiv = document.getElementById("status");
+    const form = document.getElementById('uploadForm');
+    const responseBox = document.getElementById('responseBox');
 
-    form.addEventListener("submit", function () {
-      statusDiv.innerHTML = "⏳ Uploading files...";
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const clientId = document.getElementById('clientId').value;
+      const fileInput = document.getElementById('files');
+      const files = fileInput.files;
+
+      const formData = new FormData();
+      formData.append("clientId", clientId);
+
+      for (let i = 0; i < files.length; i++) {
+        formData.append("file", files[i]);
+      }
+
+      try {
+        const res = await fetch("https://aavqxnyuhnwsdckmtimp.supabase.co/functions/v1/get-upload-link", {
+          method: "POST",
+          body: formData
+        });
+
+        const result = await res.json();
+        responseBox.textContent = JSON.stringify(result, null, 2);
+      } catch (err) {
+        responseBox.textContent = "Upload failed:\n" + err;
+      }
     });
   </script>
 </body>
 </html>
+
+
