@@ -1,68 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Butterfly Data Upload</title>
 </head>
 <body>
-  <h2>Upload Multiple Files to Butterfly Data Consulting</h2>
-  <form id="upload-form">
+  <h2>Upload Files to Butterfly Data Consulting</h2>
+
+  <form
+    id="upload-form"
+    method="POST"
+    enctype="multipart/form-data"
+    action="https://aavqxnyuhnwsdckmtimp.supabase.co/functions/v1/get-upload-link"
+  >
     <label for="clientId">Client ID:</label>
-    <input type="text" id="clientId" name="clientId" required><br><br>
+    <input
+      type="text"
+      id="clientId"
+      name="clientId"
+      value="client_123"
+      required
+    />
+    <br /><br />
 
     <label for="file">Choose Files:</label>
-    <input type="file" id="file" name="file" multiple required><br><br>
+    <input
+      type="file"
+      id="file"
+      name="file"
+      multiple
+      required
+    />
+    <br /><br />
 
     <button type="submit">Upload</button>
   </form>
 
-  <div id="status"></div>
+  <div id="status" style="margin-top: 20px;"></div>
 
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+  <script>
+    // Optional: update status after submission
+    const form = document.getElementById("upload-form");
+    const statusDiv = document.getElementById("status");
 
-    // Replace with your Supabase credentials
-    const supabaseUrl = 'https://YOUR_PROJECT.supabase.co';
-    const supabaseKey = 'YOUR_PUBLIC_ANON_KEY';
-    const bucketName = 'client-uploads';
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    document.getElementById('upload-form').addEventListener('submit', async (e) => {
-      e.preventDefault();
-
-      const clientId = document.getElementById('clientId').value.trim();
-      const files = document.getElementById('file').files;
-      const status = document.getElementById('status');
-      status.innerHTML = ''; // Clear previous messages
-
-      if (!clientId || files.length === 0) {
-        alert('Please enter Client ID and select at least one file.');
-        return;
-      }
-
-      for (const file of files) {
-        const filePath = `${clientId}/${file.name}`;
-
-        const { data, error } = await supabase.storage
-          .from(bucketName)
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: true
-          });
-
-        const item = document.createElement('p');
-
-        if (error) {
-          console.error('Upload failed:', error);
-          item.textContent = `❌ ${file.name}: Upload failed – ${error.message}`;
-        } else {
-          const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucketName}/${filePath}`;
-          item.innerHTML = `✅ <strong>${file.name}</strong>: <a href="${publicUrl}" target="_blank">View file</a>`;
-        }
-
-        status.appendChild(item);
-      }
+    form.addEventListener("submit", function () {
+      statusDiv.innerHTML = "⏳ Uploading files...";
     });
   </script>
 </body>
